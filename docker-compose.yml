@@ -1,0 +1,52 @@
+services:
+
+  api:
+    build:
+      context: .
+      dockerfile: ./src/dockerfile
+    container_name: api
+    volumes:
+      - ./src/app:/app/app
+      - ./src/manage.py:/app/manage.py
+    command: sh -c "python manage.py runserver"
+    expose:
+      - 8000
+    networks:
+      - geo-public
+
+  nginx:
+    container_name: nginx
+    build:
+      context: .
+      dockerfile: ./nginx/dockerfile
+    depends_on:
+      - api
+    networks:
+      - geo-public
+
+  postgis:
+    container_name: postgis
+    image: postgis/postgis:latest
+    restart: always
+
+    volumes:
+      - ./data/postgis:/var/lib/postgresql/data/
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+    env_file:
+      - .env
+
+    networks:
+      - geo-public
+
+
+networks:
+  geo-public:
+    external: true

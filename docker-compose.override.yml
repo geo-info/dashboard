@@ -1,0 +1,13 @@
+services:
+  api:
+    expose:
+      - 8000
+
+  nginx:
+    ports:
+      - 8080:80
+
+  postgis:
+    restart: "no"
+    ports:
+      - 5432:5432
