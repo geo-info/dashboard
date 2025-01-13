@@ -1,11 +1,11 @@
 import os
 from pathlib import Path
 
-from typing import List, Union, Any
+from typing import Any
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import (
-    PostgresDsn, Field, model_validator
+    Field, model_validator
 )
 
 BASE_DIR = Path(os.path.dirname(os.path.dirname(__file__)))
@@ -38,11 +38,11 @@ class PostgresSettings(Base):
     schemas: str = "content"
     pool_recycle: int = 1800
 
-    dsn: PostgresDsn | None = None
+    dsn: str = ''
 
     @model_validator(mode='after')
     def create_dsn(self) -> 'PostgresSettings':
-        dsn = "{protocol}://{username}:{password}@{host}:{port}/{path}".format(
+        self.dsn = "{protocol}://{username}:{password}@{host}:{port}/{path}".format(
             username = self.username,
             password = self.password,
             protocol = self.protocol,
@@ -50,13 +50,11 @@ class PostgresSettings(Base):
             port = self.port,
             path = self.path,
         )
-        self.dsn = PostgresDsn(dsn)
         return self
-
+#
     model_config = SettingsConfigDict(
         env_prefix = 'POSTGRES_', extra = 'ignore'
     )
-
 
 class UvicornSettings(Base):
     app: str = "app.main:app"
