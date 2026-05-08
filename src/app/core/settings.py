@@ -58,7 +58,7 @@ class PostgresSettings(Base):
 
 class UvicornSettings(Base):
     app: str = "app.main:app"
-    host: str = "127.0.0.1"
+    host: str = "0.0.0.0"
     port: int = 8000
     reload: bool = True
     workers: int = 3
